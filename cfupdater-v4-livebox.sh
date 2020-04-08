@@ -5,7 +5,7 @@
 #auth_email="john.appleseed@example.org"            # The email used to login 'https://dash.cloudflare.com'
 #auth_key="f1nd7h47fuck1n6k3y1ncl0udfl4r3c0n50l3"   # Top right corner, "My profile" > "Global API Key"
 #zone_identifier="f1nd7h3fuck1n6z0n31d3n71f13r4l50" # Can be found in the "Overview" tab of your domain
-#record_name="ipv4.example.org"                     # Which record you want to be synced
+#record_name="ipv4.example.org"                    # Which record you want to be synced
 
 # DO NOT CHANGE LINES BELOW (Check using Livebox v4 API)
 ip=$(curl -s -X POST -H "Content-Type: application/json" -d '{"parameters":{}}'  http://192.168.1.1/sysbus/NMC:getWANStatus | sed -e 's/.*"IPAddress":"\(.*\)","Remo.*/\1/g')
