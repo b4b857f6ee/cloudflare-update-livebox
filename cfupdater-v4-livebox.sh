@@ -23,19 +23,19 @@ if [[ $record == *"\"count\":0"* ]]; then
 fi
 
 # Set existing IP address from the fetched record
-old_ip=$(echo "$record" | grep -Po '(?<="content":")[^"]*' | head -1)
+old_ip=$(echo "$record" | grep -oE "\b([0-9]{1,3}\.){3}[0-9]{1,3}\b")
 
 # Compare if they're the same
-if [ $ip == $old_ip ]; then
+if [[ $ip == $old_ip ]]; then
   echo "[Cloudflare DDNS] IP has not changed."
   exit 0
 fi
 
 # Set the record identifier from result
-record_identifier=$(echo "$record" | grep -Po '(?<="id":")[^"]*' | head -1)
+record_identifier=$(echo "$record" | grep -oP '\"id\":\s\"\K([^"]*)')
 
 # The execution of update
-update=$(curl -s -X PUT "https://api.cloudflare.com/client/v4/zones/$zone_identifier/dns_records/$record_identifier" -H "X-Auth-Email: $auth_email" -H "X-Auth-Key: $auth_key" -H "Content-Type: application/json" --data "{\"id\":\"$zone_identifier\",\"type\":\"A\",\"proxied\":true,\"name\":\"$record_name\",\"content\":\"$ip\"}")
+update=$(curl -s -X PUT https://api.cloudflare.com/client/v4/zones/$zone_identifier/dns_records/$record_identifier -H "X-Auth-Email: $auth_email" -H "X-Auth-Key: $auth_key" -H "Content-Type: application/json" --data "{\"type\":\"A\",\"proxied\":true,\"name\":\"$record_name\",\"content\":\"$ip\",\"ttl\":120}")
 
 # The moment of truth
 case "$update" in
@@ -43,5 +43,5 @@ case "$update" in
   >&2 echo -e "[Cloudflare DDNS] Update failed for $record_identifier. DUMPING RESULTS:\n$update"
   exit 1;;
 *)
-  echo "[Cloudflare DDNS] IPv4 context '$ip4' has been synced to Cloudflare.";;
+  echo "[Cloudflare DDNS] IPv4 context '$ip' has been synced to Cloudflare.";;
 esac
