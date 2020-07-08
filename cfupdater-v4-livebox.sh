@@ -14,7 +14,7 @@ ip=$(curl -s -X POST -H "Content-Type: application/json" -d '{"parameters":{}}' 
 echo "[Cloudflare DDNS] Check Initiated"
 
 # Seek for the record
-record=$(curl -s -X GET "https://api.cloudflare.com/client/v4/zones/$zone_identifier/dns_records?name=$record_name" -H "X-Auth-Email: $auth_email" -H "X-Auth-Key: $auth_key" -H "Content-Type: application/json")
+record=$(curl -s -X GET "https://api.cloudflare.com/client/v4/zones/$zone_identifier/dns_records?type=A&name=$record_name" -H "X-Auth-Email: $auth_email" -H "X-Auth-Key: $auth_key" -H "Content-Type: application/json")
 
 # Can't do anything without the record
 if [[ $record == *"\"count\":0"* ]]; then
@@ -32,10 +32,10 @@ if [[ $ip == $old_ip ]]; then
 fi
 
 # Set the record identifier from result
-record_identifier=$(echo "$record" | grep -oP '\"id\":\s\"\K([^"]*)')
+record_identifier=$(echo "$record" | grep -oP '\"id\":\"\K([^"]*)')
 
 # The execution of update
-update=$(curl -s -X PUT https://api.cloudflare.com/client/v4/zones/$zone_identifier/dns_records/$record_identifier -H "X-Auth-Email: $auth_email" -H "X-Auth-Key: $auth_key" -H "Content-Type: application/json" --data "{\"type\":\"A\",\"proxied\":true,\"name\":\"$record_name\",\"content\":\"$ip\",\"ttl\":120}")
+update=$(curl -s -X PATCH https://api.cloudflare.com/client/v4/zones/$zone_identifier/dns_records/$record_identifier -H "X-Auth-Email: $auth_email" -H "X-Auth-Key: $auth_key" -H "Content-Type: application/json" --data "{\"type\":\"A\",\"proxied\":true,\"name\":\"$record_name\",\"content\":\"$ip\",\"ttl\":120}")
 
 # The moment of truth
 case "$update" in
